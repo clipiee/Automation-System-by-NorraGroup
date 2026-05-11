@@ -208,8 +208,13 @@ export default function Home() {
       ),
     },
     {
-      header: "Total", accessorKey: "grand_total",
-      cell: (r: any) => <span className="font-semibold text-foreground text-xs">{formatIDR(r.grand_total)}</span>,
+      header: "Product / Total", accessorKey: "grand_total",
+      cell: (r: any) => (
+        <div>
+          <p className="font-semibold text-foreground text-xs">{formatIDR(r.grand_total)}</p>
+          <p className="text-[9px] text-foreground/30 truncate w-32" title={r.event || "Unknown"}>{r.event || "Unknown Product"}</p>
+        </div>
+      )
     },
     {
       header: "Voucher", accessorKey: "voucher_code",
@@ -225,7 +230,16 @@ export default function Home() {
 
   const codeColumns = [
     {
-      header: "Code", accessorKey: "code",
+      header: "Recipient Email", accessorKey: "owner_email",
+      cell: (r: any) => (
+        <div className="flex items-center gap-1.5">
+          <Mail className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[11px] font-medium text-foreground/80">{r.owner_email || "Not Sent"}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Delivered Code", accessorKey: "code",
       cell: (r: any) => (
         <code className="text-[10px] font-mono px-1.5 py-0.5 rounded-lg text-foreground/80 tracking-wider"
           style={{ background: "rgba(209,143,235,0.1)", border: "1px solid rgba(209,143,235,0.2)" }}>
@@ -234,11 +248,7 @@ export default function Home() {
       ),
     },
     {
-      header: "Owner", accessorKey: "owner_email",
-      cell: (r: any) => <span className="text-[10px] text-foreground/60">{r.owner_email || "—"}</span>,
-    },
-    {
-      header: "Used At", accessorKey: "used_at",
+      header: "Sent At", accessorKey: "used_at",
       cell: (r: any) => <span className="text-[10px] text-foreground/40">{r.used_at ? fmtDate(r.used_at) : "—"}</span>,
     },
   ];
@@ -261,7 +271,7 @@ export default function Home() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">CEO Command Center</h2>
           <p className="text-sm text-foreground/40 mt-0.5">
-            Real-time business intelligence for SnipieAI.com
+            Real-time business intelligence for NorraClip
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -425,11 +435,12 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
-                  <Key className="w-4 h-4 text-success" /> Recent Activations
+                  <Mail className="w-4 h-4 text-success" /> Recent Email Deliveries
                 </h3>
               </div>
             </div>
-            <DataTable columns={codeColumns} data={codes} />
+            {/* Only show codes that have been sent (owner_email exists) */}
+            <DataTable columns={codeColumns} data={codes.filter(c => c.owner_email).slice(0, 10)} />
           </motion.div>
       </div>
     </div>

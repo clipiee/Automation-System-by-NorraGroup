@@ -51,7 +51,7 @@ export default function BugReportsPage() {
             Bug Reports
           </h2>
           <p className="text-xs text-foreground/40 mt-0.5">
-            Laporan bug dari pengguna SnipieAI · {reports.length} laporan
+            Laporan bug dari pengguna NorraClip · {reports.length} laporan
           </p>
         </div>
         <button onClick={fetchData}
@@ -64,10 +64,10 @@ export default function BugReportsPage() {
       {/* Stats bar */}
       <motion.div {...fadeUp(0.05)} className="flex flex-wrap gap-3">
         {[
-          { label: "Total Reports",    value: reports.length,                                       color: "#f43f5e", bg: "rgba(244,63,94,0.08)",  border: "rgba(244,63,94,0.2)"  },
-          { label: "With Screenshot",  value: reports.filter(r => r.image_url).length,              color: "#d18feb", bg: "rgba(209,143,235,0.08)", border: "rgba(209,143,235,0.2)" },
-          { label: "No Screenshot",    value: reports.filter(r => !r.image_url).length,             color: "#f97316", bg: "rgba(249,115,22,0.08)",  border: "rgba(249,115,22,0.2)"  },
-          { label: "This Month",       value: reports.filter(r => r.created_at.startsWith("2026-05")).length, color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)" },
+          { label: "Total Reports",   value: reports.length,                                        color: "#ef4444", bg: "rgba(239,68,68,0.07)",  border: "rgba(239,68,68,0.18)"  },
+          { label: "With Screenshot", value: reports.filter(r => r.image_url).length,               color: "#60a5fa", bg: "rgba(96,165,250,0.07)",  border: "rgba(96,165,250,0.18)" },
+          { label: "No Screenshot",   value: reports.filter(r => !r.image_url).length,              color: "#f97316", bg: "rgba(249,115,22,0.07)",  border: "rgba(249,115,22,0.18)" },
+          { label: "This Month",      value: reports.filter(r => r.created_at.startsWith("2026-05")).length, color: "#0f172a", bg: "rgba(15,23,42,0.04)", border: "rgba(15,23,42,0.1)" },
         ].map(s => (
           <div key={s.label} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm"
             style={{ background: s.bg, border: `1px solid ${s.border}` }}>
@@ -109,7 +109,7 @@ export default function BugReportsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                   <div className="absolute top-3 right-3">
                     <span className="text-[10px] px-2 py-1 rounded-full text-white font-medium"
-                      style={{ background: "rgba(209,143,235,0.8)", backdropFilter: "blur(8px)" }}>
+                      style={{ background: "rgba(96,165,250,0.7)", backdropFilter: "blur(8px)" }}>
                       📷 Screenshot
                     </span>
                   </div>
@@ -137,7 +137,7 @@ export default function BugReportsPage() {
                 </div>
 
                 <div className="flex items-center gap-1.5 text-xs text-foreground/35 mt-3 pt-3"
-                  style={{ borderTop: "1px solid rgba(209,143,235,0.12)" }}>
+                  style={{ borderTop: "1px solid rgba(96,165,250,0.1)" }}>
                   <Calendar className="w-3 h-3" />
                   {fmtDate(report.created_at)}
                 </div>
@@ -154,7 +154,7 @@ export default function BugReportsPage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: "rgba(30,16,48,0.6)", backdropFilter: "blur(8px)" }}
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)" }}
           onClick={() => setSelected(null)}
         >
           <motion.div
@@ -203,7 +203,7 @@ export default function BugReportsPage() {
               <button
                 onClick={() => setSelected(null)}
                 className="mt-5 w-full py-2.5 rounded-xl text-sm font-medium text-foreground/60 transition-colors"
-                style={{ background: "rgba(209,143,235,0.1)", border: "1px solid rgba(209,143,235,0.2)" }}>
+                style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.15)" }}>
                 Tutup
               </button>
             </div>

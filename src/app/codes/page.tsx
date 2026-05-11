@@ -33,6 +33,32 @@ export default function CodesPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const PAGE_SIZE = 50;
 
+  const copyToClipboard = (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Kode disalin: " + text);
+      });
+    } else {
+      // Fallback for non-HTTPS mobile browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert("Kode disalin: " + text);
+      } catch (error) {
+        console.error("Fallback copy error:", error);
+        alert("Gagal menyalin kode. Pastikan menggunakan HTTPS.");
+      }
+      textArea.remove();
+    }
+  };
+
   const fetchData = async (p = 0, status = filterStatus, search = searchQuery) => {
     setLoading(true);
     let query = supabase
@@ -69,8 +95,8 @@ export default function CodesPage() {
     .map(([day, used]) => ({ day, used }));
 
   const inventoryStats = [
-    { name: "Available", value: unused, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.25)" },
-    { name: "Used",      value: used,   color: "#d18feb", bg: "rgba(209,143,235,0.1)", border: "rgba(209,143,235,0.25)" },
+    { name: "Available", value: unused, color: "#10b981", bg: "rgba(16,185,129,0.08)",  border: "rgba(16,185,129,0.2)"  },
+    { name: "Used",      value: used,   color: "#60a5fa", bg: "rgba(96,165,250,0.08)",  border: "rgba(96,165,250,0.2)"  },
   ];
 
   const columns = [
@@ -79,18 +105,15 @@ export default function CodesPage() {
       cell: (r: any) => (
         <div className="flex items-center gap-2">
           <code className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-foreground/80 tracking-widest"
-            style={{ background: "rgba(209,143,235,0.1)", border: "1px solid rgba(209,143,235,0.22)" }}>
+            style={{ background: "rgba(96,165,250,0.08)", border: "1px solid rgba(96,165,250,0.18)" }}>
             {r.code}
           </code>
           <button 
-            onClick={() => {
-              navigator.clipboard.writeText(r.code);
-              // Optional visual feedback could go here
-            }} 
-            className="p-1.5 hover:bg-foreground/5 rounded-md text-foreground/40 hover:text-primary transition-colors"
+            onClick={() => copyToClipboard(r.code)} 
+            className="p-2 sm:p-1.5 hover:bg-foreground/5 rounded-md text-foreground/40 hover:text-primary transition-colors active:scale-95"
             title="Copy Code"
           >
-            <Copy className="w-3.5 h-3.5" />
+            <Copy className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
         </div>
       ),
@@ -160,7 +183,7 @@ export default function CodesPage() {
           </div>
         ))}
         <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm"
-          style={{ background: "rgba(30,16,48,0.05)", border: "1px solid rgba(30,16,48,0.1)" }}>
+          style={{ background: "rgba(15,23,42,0.04)", border: "1px solid rgba(15,23,42,0.1)" }}>
           <span className="text-foreground/60">Showing</span>
           <span className="font-bold text-foreground">{codes.length} of 5,504 total</span>
         </div>
@@ -179,10 +202,10 @@ export default function CodesPage() {
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="2 2" stroke="rgba(209,143,235,0.15)" vertical={false} />
-              <XAxis dataKey="day" tick={{ fill: "rgba(30,16,48,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "rgba(30,16,48,0.35)", fontSize: 9 }} axisLine={false} tickLine={false} width={22} />
-              <Tooltip cursor={{ stroke: "rgba(209,143,235,0.3)", strokeWidth: 1 }}
+              <CartesianGrid strokeDasharray="2 2" stroke="rgba(96,165,250,0.1)" vertical={false} />
+              <XAxis dataKey="day" tick={{ fill: "rgba(15,23,42,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "rgba(15,23,42,0.35)", fontSize: 9 }} axisLine={false} tickLine={false} width={22} />
+              <Tooltip cursor={{ stroke: "rgba(96,165,250,0.3)", strokeWidth: 1 }}
                 content={({ active, payload, label }) => active && payload?.length ? (
                   <div className="glass-panel px-3 py-2 rounded-xl text-xs">
                     <p className="text-foreground/50 mb-1">{label}</p>
@@ -216,8 +239,8 @@ export default function CodesPage() {
               <span className="font-semibold text-foreground/80">{item.value.toLocaleString()}</span>
             </div>
           ))}
-          <div className="mt-4 h-2 rounded-full overflow-hidden" style={{ background: "rgba(209,143,235,0.15)" }}>
-            <div className="h-full rounded-full" style={{ width: `${Math.round((unused / (unused + used)) * 100)}%`, background: "linear-gradient(90deg, #10b981, #d18feb)" }} />
+          <div className="mt-4 h-2 rounded-full overflow-hidden" style={{ background: "rgba(96,165,250,0.1)" }}>
+            <div className="h-full rounded-full" style={{ width: `${Math.round((unused / (unused + used)) * 100)}%`, background: "linear-gradient(90deg, #10b981, #60a5fa)" }} />
           </div>
         </motion.div>
       </div>
@@ -271,7 +294,7 @@ export default function CodesPage() {
               </button>
               <button onClick={() => fetchData(page, filterStatus, searchQuery)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white ml-1 transition-opacity hover:opacity-90"
-                style={{ background: "linear-gradient(135deg, #d18feb, #a78bfa)" }}>
+                style={{ background: "linear-gradient(135deg, #60a5fa, #3b82f6)" }}>
                 <RefreshCw className="w-3 h-3" /> Sync
               </button>
             </div>

@@ -18,52 +18,52 @@ interface StatCardProps {
 
 const colorMap = {
   primary: {
-    bg: "rgba(209,143,235,0.1)",
-    border: "rgba(209,143,235,0.28)",
-    icon: "#d18feb",
-    iconBg: "rgba(209,143,235,0.16)",
-    glow: "0 6px 28px -6px rgba(209,143,235,0.45)",
-    stroke: "#d18feb",
+    bg: "rgba(96,165,250,0.08)",
+    border: "rgba(96,165,250,0.22)",
+    icon: "#3b82f6",
+    iconBg: "rgba(96,165,250,0.12)",
+    glow: "0 6px 28px -6px rgba(96,165,250,0.35)",
+    stroke: "#60a5fa",
   },
   accent: {
-    bg: "rgba(167,139,250,0.09)",
-    border: "rgba(167,139,250,0.25)",
-    icon: "#a78bfa",
-    iconBg: "rgba(167,139,250,0.14)",
-    glow: "0 6px 28px -6px rgba(167,139,250,0.4)",
-    stroke: "#a78bfa",
+    bg: "rgba(147,197,253,0.09)",
+    border: "rgba(147,197,253,0.25)",
+    icon: "#60a5fa",
+    iconBg: "rgba(147,197,253,0.14)",
+    glow: "0 6px 28px -6px rgba(147,197,253,0.35)",
+    stroke: "#93c5fd",
   },
   pink: {
-    bg: "rgba(236,72,153,0.08)",
-    border: "rgba(236,72,153,0.22)",
-    icon: "#ec4899",
-    iconBg: "rgba(236,72,153,0.13)",
-    glow: "0 6px 28px -6px rgba(236,72,153,0.35)",
-    stroke: "#ec4899",
+    bg: "rgba(15,23,42,0.04)",
+    border: "rgba(15,23,42,0.12)",
+    icon: "#0f172a",
+    iconBg: "rgba(15,23,42,0.08)",
+    glow: "0 6px 28px -6px rgba(15,23,42,0.15)",
+    stroke: "#334155",
   },
   orange: {
-    bg: "rgba(249,115,22,0.08)",
-    border: "rgba(249,115,22,0.22)",
+    bg: "rgba(249,115,22,0.07)",
+    border: "rgba(249,115,22,0.18)",
     icon: "#f97316",
-    iconBg: "rgba(249,115,22,0.13)",
-    glow: "0 6px 28px -6px rgba(249,115,22,0.35)",
+    iconBg: "rgba(249,115,22,0.11)",
+    glow: "0 6px 28px -6px rgba(249,115,22,0.28)",
     stroke: "#f97316",
   },
   success: {
-    bg: "rgba(16,185,129,0.08)",
-    border: "rgba(16,185,129,0.22)",
+    bg: "rgba(16,185,129,0.07)",
+    border: "rgba(16,185,129,0.18)",
     icon: "#10b981",
-    iconBg: "rgba(16,185,129,0.13)",
-    glow: "0 6px 28px -6px rgba(16,185,129,0.35)",
+    iconBg: "rgba(16,185,129,0.11)",
+    glow: "0 6px 28px -6px rgba(16,185,129,0.28)",
     stroke: "#10b981",
   },
   danger: {
-    bg: "rgba(244,63,94,0.08)",
-    border: "rgba(244,63,94,0.22)",
-    icon: "#f43f5e",
-    iconBg: "rgba(244,63,94,0.13)",
-    glow: "0 6px 28px -6px rgba(244,63,94,0.35)",
-    stroke: "#f43f5e",
+    bg: "rgba(239,68,68,0.07)",
+    border: "rgba(239,68,68,0.18)",
+    icon: "#ef4444",
+    iconBg: "rgba(239,68,68,0.11)",
+    glow: "0 6px 28px -6px rgba(239,68,68,0.28)",
+    stroke: "#ef4444",
   },
 };
 
@@ -80,10 +80,10 @@ export default function StatCard({
       transition={{ delay, duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
       whileHover={{ y: -5, boxShadow: c.glow, transition: { duration: 0.2 } }}
       className="relative overflow-hidden rounded-2xl p-5 group cursor-default"
-      style={{ background: `linear-gradient(145deg, ${c.bg}, rgba(255,255,255,0.92))`, border: `1px solid ${c.border}` }}
+      style={{ background: `linear-gradient(145deg, ${c.bg}, rgba(255,255,255,0.95))`, border: `1px solid ${c.border}` }}
     >
       {/* Corner orb */}
-      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-40 group-hover:opacity-70 transition-opacity"
+      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"
         style={{ background: c.icon }} />
 
       {/* Top row */}

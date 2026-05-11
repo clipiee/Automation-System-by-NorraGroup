@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf6ff;
-  --foreground: #1e1030;
-  --surface: #f3eafb;
-  --card: rgba(255, 255, 255, 0.88);
-  --card-border: rgba(209, 143, 235, 0.22);
-  --card-hover-border: rgba(209, 143, 235, 0.55);
-  --primary: #d18feb;
-  --primary-dark: #b56fd4;
-  --primary-glow: rgba(209, 143, 235, 0.4);
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --surface: #f8fafc;
+  --card: #ffffff;
+  --card-border: rgba(96, 165, 250, 0.15);
+  --card-hover-border: rgba(96, 165, 250, 0.35);
+  --primary: #60a5fa;
+  --primary-dark: #3b82f6;
+  --primary-glow: rgba(96, 165, 250, 0.2);
   --primary-foreground: #ffffff;
-  --secondary: rgba(209, 143, 235, 0.08);
-  --accent: #a78bfa;
-  --accent-glow: rgba(167, 139, 250, 0.35);
+  --secondary: #f1f5f9;
+  --accent: #93c5fd;
+  --accent-glow: rgba(147, 197, 253, 0.15);
   --pink: #ec4899;
-  --pink-glow: rgba(236, 72, 153, 0.3);
+  --pink-glow: rgba(236, 72, 153, 0.15);
   --orange: #f97316;
-  --orange-glow: rgba(249, 115, 22, 0.3);
-  --destructive: #f43f5e;
-  --destructive-glow: rgba(244, 63, 94, 0.3);
+  --orange-glow: rgba(249, 115, 22, 0.15);
+  --destructive: #ef4444;
+  --destructive-glow: rgba(239, 68, 68, 0.15);
   --success: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.3);
+  --success-glow: rgba(16, 185, 129, 0.15);
   --warning: #f59e0b;
-  --muted: rgba(30, 16, 48, 0.45);
+  --muted: #64748b;
 }
 
 @theme inline {
@@ -55,14 +55,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Soft purple mesh background */
+/* Soft blue mesh background */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(209,143,235,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(167,139,250,0.1) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(96,165,250,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(147,197,253,0.04) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -70,8 +70,7 @@ body::after {
 .glass-panel {
   background: var(--card);
   border: 1px solid var(--card-border);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 4px 20px -8px rgba(0,0,0,0.04);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -90,7 +89,7 @@ body::after {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(209,143,235,0.6), rgba(167,139,250,0.3), rgba(236,72,153,0.3));
+  background: linear-gradient(135deg, rgba(96,165,250,0.6), rgba(147,197,253,0.3), rgba(59,130,246,0.3));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
@@ -114,7 +113,7 @@ body::after {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #d18feb, #a78bfa, #ec4899, #d18feb);
+  background: linear-gradient(135deg, #60a5fa, #93c5fd, #3b82f6, #60a5fa);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -125,5 +124,5 @@ body::after {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(209,143,235,0.35); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(209,143,235,0.6); }
+::-webkit-scrollbar-thumb { background: rgba(96,165,250,0.35); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.6); }

@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SnipieAI Dashboard",
-  description: "Monitor payments, activations, and bug reports for SnipieAI.com",
+  title: "NorraClip Dashboard",
+  description: "Monitor payments, activations, and bug reports for NorraClip",
 };
 
 export default function RootLayout({
@@ -36,8 +36,8 @@ export default function RootLayout({
           <Header />
           <main className="flex-1 overflow-y-auto p-8 relative">
             {/* Background glowing orbs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none" style={{ background: "rgba(209,143,235,0.12)" }}></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none" style={{ background: "rgba(167,139,250,0.1)" }}></div>
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none" style={{ background: "rgba(96,165,250,0.04)" }}></div>
+            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none" style={{ background: "rgba(147,197,253,0.03)" }}></div>
             
             <div className="relative z-10">
               {children}

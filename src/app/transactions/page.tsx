@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import DataTable from "@/components/DataTable";
-import { ArrowLeftRight, CheckCircle2, XCircle, Clock, Download, RefreshCw } from "lucide-react";
+import { ArrowLeftRight, RefreshCw, Trash2, AlertTriangle, X } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -48,6 +48,8 @@ export default function TransactionsPage() {
   const [payments, setPayments] = useState<LynkPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<string>("");
+  const [deleteTarget, setDeleteTarget] = useState<LynkPayment | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -65,6 +67,19 @@ export default function TransactionsPage() {
   }, []);
 
   if (!isMounted) return null;
+
+  const handleDelete = async (id: string) => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("lynk_payments").delete().eq("id", id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (error) {
+      alert("Gagal menghapus transaksi: " + error.message);
+    } else {
+      fetchData();
+    }
+  };
 
   // Convert UTC timestamp to local YYYY-MM-DD string
   const getLocalYYYYMMDD = (utcString: string) => {
@@ -96,8 +111,8 @@ export default function TransactionsPage() {
   const withVoucher    = filteredPayments.filter(p => p.voucher_code);
   const withoutVoucher = filteredPayments.filter(p => !p.voucher_code);
   const voucherData = [
-    { name: "Full Price", value: withoutVoucher.length, color: "#d18feb" },
-    { name: "With Voucher", value: withVoucher.length, color: "#a78bfa" },
+    { name: "Full Price", value: withoutVoucher.length, color: "#60a5fa" },
+    { name: "With Voucher", value: withVoucher.length, color: "#0f172a" },
   ];
 
   const totalRevenue     = filteredPayments.reduce((s, p) => s + Number(p.grand_total), 0);
@@ -140,17 +155,99 @@ export default function TransactionsPage() {
       header: "Date", accessorKey: "created_at",
       cell: (r: any) => <span className="text-xs text-foreground/40">{fmtDate(r.created_at)}</span>,
     },
+    {
+      header: "Action", accessorKey: "id",
+      cell: (r: any) => (
+        <button 
+          onClick={() => setDeleteTarget(r)}
+          className="p-1.5 text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+          title="Hapus Transaksi"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      ),
+    },
   ];
 
   return (
     <div className="space-y-6">
+      {/* ── Delete Confirmation Modal ── */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+              onClick={() => setDeleteTarget(null)}
+            />
+            {/* Modal Card */}
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10"
+              style={{ border: "1px solid rgba(96,165,250,0.2)" }}
+              initial={{ scale: 0.92, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 12 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            >
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="absolute top-4 right-4 text-foreground/30 hover:text-foreground/60 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-start gap-3 mb-5">
+                <div className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)" }}>
+                  <AlertTriangle className="w-4.5 h-4.5 text-destructive" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground text-sm">Hapus Transaksi</h3>
+                  <p className="text-xs text-foreground/50 mt-0.5">Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+              </div>
+
+              {/* Transaction summary */}
+              <div className="rounded-xl p-3 mb-5 space-y-1" style={{ background: "#f8fafc", border: "1px solid rgba(96,165,250,0.12)" }}>
+                <p className="text-xs font-medium text-foreground/80">{deleteTarget.customer_name || "Unknown"}</p>
+                <p className="text-[11px] text-foreground/40">{deleteTarget.customer_email}</p>
+                <p className="text-xs font-bold text-foreground mt-1.5">{formatIDR(deleteTarget.grand_total)}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
+                  style={{ background: "#f1f5f9", border: "1px solid rgba(0,0,0,0.06)" }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteTarget.id)}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
+                  style={{ background: "#ef4444" }}
+                >
+                  {deleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  {deleting ? "Menghapus..." : "Hapus"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Summary pills */}
       <motion.div {...fadeUp(0.05)} className="flex flex-wrap gap-3">
         {[
-          { label: "Total Payments",  value: filteredPayments.length,          color: "#d18feb", bg: "rgba(209,143,235,0.1)", border: "rgba(209,143,235,0.25)" },
-          { label: "Total Revenue",   value: formatIDR(totalRevenue),  color: "#10b981", bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)"  },
-          { label: "With Voucher",    value: withVoucher.length,        color: "#a78bfa", bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.25)" },
-          { label: "Discount Given",  value: formatIDR(discountGiven), color: "#f43f5e", bg: "rgba(244,63,94,0.1)",  border: "rgba(244,63,94,0.25)"  },
+          { label: "Total Payments",  value: filteredPayments.length,          color: "#60a5fa", bg: "rgba(96,165,250,0.08)",  border: "rgba(96,165,250,0.2)" },
+          { label: "Total Revenue",   value: formatIDR(totalRevenue),  color: "#10b981", bg: "rgba(16,185,129,0.08)",  border: "rgba(16,185,129,0.2)"  },
+          { label: "With Voucher",    value: withVoucher.length,        color: "#0f172a", bg: "rgba(15,23,42,0.05)",   border: "rgba(15,23,42,0.1)"    },
+          { label: "Discount Given",  value: formatIDR(discountGiven), color: "#ef4444", bg: "rgba(239,68,68,0.07)",  border: "rgba(239,68,68,0.18)"  },
         ].map(s => (
           <div key={s.label} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm"
             style={{ background: s.bg, border: `1px solid ${s.border}` }}>
@@ -170,14 +267,14 @@ export default function TransactionsPage() {
             <BarChart data={dailyData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id="tRevGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#d18feb" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.4} />
+                  <stop offset="0%"   stopColor="#60a5fa" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="2 2" stroke="rgba(209,143,235,0.15)" vertical={false} />
-              <XAxis dataKey="day" tick={{ fill: "rgba(30,16,48,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "rgba(30,16,48,0.35)", fontSize: 9 }} axisLine={false} tickLine={false} width={48} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(209,143,235,0.08)" }} />
+              <CartesianGrid strokeDasharray="2 2" stroke="rgba(96,165,250,0.12)" vertical={false} />
+              <XAxis dataKey="day" tick={{ fill: "rgba(15,23,42,0.4)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "rgba(15,23,42,0.35)", fontSize: 9 }} axisLine={false} tickLine={false} width={48} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(96,165,250,0.06)" }} />
               <Bar dataKey="revenue" name="revenue" fill="url(#tRevGrad)" radius={[4, 4, 0, 0]} maxBarSize={28} />
             </BarChart>
           </ResponsiveContainer>
@@ -220,7 +317,7 @@ export default function TransactionsPage() {
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className="px-3 py-2 rounded-xl text-sm text-foreground bg-transparent outline-none transition-colors"
-              style={{ border: "1px solid rgba(209,143,235,0.3)" }}
+              style={{ border: "1px solid rgba(96,165,250,0.3)" }}
             />
             {dateFilter && (
               <button onClick={() => setDateFilter("")} className="text-xs text-foreground/50 hover:text-foreground">
@@ -228,7 +325,7 @@ export default function TransactionsPage() {
               </button>
             )}
             <button onClick={fetchData} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-              style={{ background: "rgba(209,143,235,0.07)", border: "1px solid rgba(209,143,235,0.2)" }}>
+              style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.2)" }}>
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
           </div>
