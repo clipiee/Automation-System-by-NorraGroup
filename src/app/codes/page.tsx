@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import DataTable from "@/components/DataTable";
-import { Key, Plus, RefreshCw, CheckCircle2, Clock, Download } from "lucide-react";
+import { Key, Plus, RefreshCw, CheckCircle2, Clock, Download, Copy, Search, Filter } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -29,20 +29,31 @@ export default function CodesPage() {
   const [codes, setCodes] = useState<ActivationCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const PAGE_SIZE = 50;
 
-  const fetchData = async (p = 0) => {
+  const fetchData = async (p = 0, status = filterStatus, search = searchQuery) => {
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("activation_codes")
       .select("code, status, used_by, owner_email, duration_months, created_at, used_at")
       .order("created_at", { ascending: false })
       .range(p * PAGE_SIZE, (p + 1) * PAGE_SIZE - 1);
+
+    if (status !== "all") {
+      query = query.eq("status", status);
+    }
+    if (search.trim() !== "") {
+      query = query.or(`code.ilike.%${search}%,owner_email.ilike.%${search}%`);
+    }
+
+    const { data } = await query;
     setCodes((data ?? []) as ActivationCode[]);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(page); }, [page]);
+  useEffect(() => { fetchData(page, filterStatus, searchQuery); }, [page, filterStatus, searchQuery]);
 
   const unused  = codes.filter(c => c.status === "unused").length;
   const used    = codes.filter(c => c.status === "used").length;
@@ -66,10 +77,22 @@ export default function CodesPage() {
     {
       header: "Activation Code", accessorKey: "code",
       cell: (r: any) => (
-        <code className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-foreground/80 tracking-widest"
-          style={{ background: "rgba(209,143,235,0.1)", border: "1px solid rgba(209,143,235,0.22)" }}>
-          {r.code}
-        </code>
+        <div className="flex items-center gap-2">
+          <code className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-foreground/80 tracking-widest"
+            style={{ background: "rgba(209,143,235,0.1)", border: "1px solid rgba(209,143,235,0.22)" }}>
+            {r.code}
+          </code>
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(r.code);
+              // Optional visual feedback could go here
+            }} 
+            className="p-1.5 hover:bg-foreground/5 rounded-md text-foreground/40 hover:text-primary transition-colors"
+            title="Copy Code"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+        </div>
       ),
     },
     {
@@ -98,6 +121,29 @@ export default function CodesPage() {
     {
       header: "Used At", accessorKey: "used_at",
       cell: (r: any) => <span className="text-xs text-foreground/40">{r.used_at ? fmtDate(r.used_at) : "—"}</span>,
+    },
+    {
+      header: "Actions", accessorKey: "actions",
+      cell: (r: any) => (
+        <button 
+          onClick={async () => {
+            const newStatus = r.status === "unused" ? "used" : "unused";
+            const { error } = await supabase.from("activation_codes").update({ status: newStatus }).eq("code", r.code);
+            if (!error) {
+              setCodes(prev => prev.map(c => c.code === r.code ? { ...c, status: newStatus } : c));
+            } else {
+              alert("Gagal mengubah status: " + error.message);
+            }
+          }}
+          className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors ${
+            r.status === "unused" 
+              ? "border-foreground/10 hover:bg-foreground/5 text-foreground/70" 
+              : "border-success/20 hover:bg-success/10 text-success"
+          }`}
+        >
+          {r.status === "unused" ? "Mark Used" : "Mark Available"}
+        </button>
+      ),
     },
   ];
 
@@ -183,29 +229,52 @@ export default function CodesPage() {
             <h3 className="font-semibold text-foreground flex items-center gap-2">
               <Key className="w-4 h-4 text-success" /> Activation Codes
             </h3>
-            <p className="text-xs text-foreground/40 mt-0.5">Live dari Supabase · {PAGE_SIZE} per page · 5,504 total</p>
+            <p className="text-xs text-foreground/40 mt-0.5">Live dari Supabase · {PAGE_SIZE} per page</p>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {/* Pagination */}
-            <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p-1))}
-              className="px-3 py-2 rounded-xl text-xs font-medium text-foreground/60 disabled:opacity-30"
-              style={{ background: "rgba(209,143,235,0.07)", border: "1px solid rgba(209,143,235,0.2)" }}>
-              ← Prev
-            </button>
-            <span className="px-3 py-2 rounded-xl text-xs font-medium text-foreground/60"
-              style={{ background: "rgba(209,143,235,0.07)", border: "1px solid rgba(209,143,235,0.2)" }}>
-              Page {page + 1} / {Math.ceil(5504 / PAGE_SIZE)}
-            </span>
-            <button onClick={() => setPage(p => p + 1)}
-              className="px-3 py-2 rounded-xl text-xs font-medium text-foreground/60"
-              style={{ background: "rgba(209,143,235,0.07)", border: "1px solid rgba(209,143,235,0.2)" }}>
-              Next →
-            </button>
-            <button onClick={() => fetchData(page)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white"
-              style={{ background: "linear-gradient(135deg, #d18feb, #a78bfa)" }}>
-              <RefreshCw className="w-3 h-3" /> Sync
-            </button>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/40" />
+              <input 
+                type="text" 
+                placeholder="Search code or email..." 
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+                className="pl-8 pr-3 py-1.5 rounded-xl text-xs bg-foreground/5 border border-foreground/10 text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+            </div>
+
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <Filter className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/40 pointer-events-none" />
+              <select 
+                value={filterStatus}
+                onChange={(e) => { setFilterStatus(e.target.value); setPage(0); }}
+                className="pl-8 pr-6 py-1.5 appearance-none rounded-xl text-xs bg-foreground/5 border border-foreground/10 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer"
+              >
+                <option value="all">All Status</option>
+                <option value="unused">Available</option>
+                <option value="used">Used</option>
+              </select>
+            </div>
+            
+            {/* Pagination & Sync */}
+            <div className="flex gap-1 ml-auto sm:ml-2">
+              <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p-1))}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-foreground/60 disabled:opacity-30 border border-foreground/10 hover:bg-foreground/5 transition-colors">
+                ←
+              </button>
+              <button onClick={() => setPage(p => p + 1)}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-foreground/60 border border-foreground/10 hover:bg-foreground/5 transition-colors">
+                →
+              </button>
+              <button onClick={() => fetchData(page, filterStatus, searchQuery)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white ml-1 transition-opacity hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #d18feb, #a78bfa)" }}>
+                <RefreshCw className="w-3 h-3" /> Sync
+              </button>
+            </div>
           </div>
         </div>
         {loading ? (
